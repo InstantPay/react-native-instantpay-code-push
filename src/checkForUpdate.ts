@@ -1,6 +1,6 @@
 import { Platform } from "react-native";
-import { HotUpdaterError } from "./error";
-import type { HotUpdaterResolver } from "./types";
+import { IpayCodePushError } from "./error";
+
 import {
     getAppVersion,
     getBundleId,
@@ -10,16 +10,20 @@ import {
     updateBundle,
 } from "./native";
 
+import type { IpayCodePushResolver, AppUpdateInfo } from "./types";
+
+
 export interface CheckForUpdateOptions {
     /**
      * Update strategy
      * - "fingerprint": Use fingerprint hash to check for updates
      * - "appVersion": Use app version to check for updates
-     * - Can override the strategy set in HotUpdater.wrap()
+     * - Can override the strategy set in IpayCodePush.wrap()
      */
     updateStrategy: "appVersion" | "fingerprint";
 
     requestHeaders?: Record<string, string>;
+    
     onError?: (error: Error) => void;
     /**
      * The timeout duration for the request.
@@ -31,26 +35,27 @@ export interface CheckForUpdateOptions {
 export type CheckForUpdateResult = AppUpdateInfo & {
     /**
      * Updates the bundle.
-     * This method is equivalent to `HotUpdater.updateBundle()` but with all required arguments pre-filled.
+     * This method is equivalent to `IpayCodePush.updateBundle()` but with all required arguments pre-filled.
      */
     updateBundle: () => Promise<boolean>;
 };
 
 // Internal type that includes resolver for use within index.ts
 export interface InternalCheckForUpdateOptions extends CheckForUpdateOptions {
-    resolver: HotUpdaterResolver;
+    resolver: IpayCodePushResolver;
 }
 
 export async function checkForUpdate(
     options: InternalCheckForUpdateOptions,
 ): Promise<CheckForUpdateResult | null> {
     if (__DEV__) {
+        console.log('checkForUpdate : Running in dev mode')
         return null;
     }
 
     if (!["ios", "android"].includes(Platform.OS)) {
         options.onError?.(
-            new HotUpdaterError("HotUpdater is only supported on iOS and Android"),
+            new IpayCodePushError("IpayCodePush is only supported on iOS and Android"),
         );
         return null;
     }
@@ -62,7 +67,7 @@ export async function checkForUpdate(
     const channel = getChannel();
 
     if (!currentAppVersion) {
-        options.onError?.(new HotUpdaterError("Failed to get app version"));
+        options.onError?.(new IpayCodePushError("Failed to get app version"));
         return null;
     }
 
@@ -70,7 +75,7 @@ export async function checkForUpdate(
 
     if (!options.resolver?.checkUpdate) {
         options.onError?.(
-        new HotUpdaterError("Resolver is required but not configured"),
+            new IpayCodePushError("Resolver is required but not configured"),
         );
         return null;
     }
@@ -79,15 +84,15 @@ export async function checkForUpdate(
 
     try {
         updateInfo = await options.resolver.checkUpdate({
-        platform,
-        appVersion: currentAppVersion,
-        bundleId: currentBundleId,
-        minBundleId,
-        channel,
-        updateStrategy: options.updateStrategy,
-        fingerprintHash,
-        requestHeaders: options.requestHeaders,
-        requestTimeout: options.requestTimeout,
+            platform,
+            appVersion: currentAppVersion,
+            bundleId: currentBundleId,
+            minBundleId,
+            channel,
+            updateStrategy: options.updateStrategy,
+            fingerprintHash,
+            requestHeaders: options.requestHeaders,
+            requestTimeout: options.requestTimeout,
         });
     } catch (error) {
         options.onError?.(error as Error);

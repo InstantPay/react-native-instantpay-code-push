@@ -1,5 +1,5 @@
 /**
- * Hot Updater Error Codes
+ * Ipay Code Push Error Codes
  *
  * This file defines all possible error codes that can be thrown by the native
  * updateBundle function. These error codes are shared across iOS and Android
@@ -16,7 +16,7 @@
  * - Non-retryable: Most validation and verification errors
  */
 
-export enum HotUpdaterErrorCode {
+export enum IpayCodePushErrorCode {
     // ==================== Parameter Validation Errors ====================
 
     /**
@@ -102,7 +102,7 @@ export enum HotUpdaterErrorCode {
     /**
      * Bundle is in crashed history and cannot be applied.
      * Thrown when attempting to install a bundle that previously caused a crash.
-     * Use HotUpdater.clearCrashHistory() to allow retrying this bundle.
+     * Use IpayCodePush.clearCrashHistory() to allow retrying this bundle.
      * @retryable false - Bundle was marked as crashed for safety
      */
     BUNDLE_IN_CRASHED_HISTORY = "BUNDLE_IN_CRASHED_HISTORY",
@@ -132,28 +132,28 @@ export enum HotUpdaterErrorCode {
 }
 
 /**
- * Type guard to check if an error is a HotUpdaterError
+ * Type guard to check if an error is a IpayCodePushError
  */
-export function isHotUpdaterError(
+export function isIpayCodePushError(
     error: unknown,
-): error is { code: HotUpdaterErrorCode; message: string } {
+): error is { code: IpayCodePushErrorCode; message: string } {
     return (
         typeof error === "object" &&
         error !== null &&
         "code" in error &&
         typeof error.code === "string" &&
-        Object.values(HotUpdaterErrorCode).includes(
-            error.code as HotUpdaterErrorCode,
+        Object.values(IpayCodePushErrorCode).includes(
+            error.code as IpayCodePushErrorCode,
         )
     );
 }
 
 /**
- * Base error class for Hot Updater
+ * Base error class for Ipay Code Push
  */
-export class HotUpdaterError extends Error {
+export class IpayCodePushError extends Error {
     constructor(message: string) {
         super(message);
-        this.name = "HotUpdaterError";
+        this.name = "IpayCodePushError";
     }
 }

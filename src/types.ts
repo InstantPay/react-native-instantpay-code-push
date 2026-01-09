@@ -80,7 +80,7 @@ export interface ResolverNotifyAppReadyParams {
 /**
  * Resolver interface for custom network operations
  */
-export interface HotUpdaterResolver {
+export interface IpayCodePushResolver {
     /**
      * Custom implementation for checking updates.
      * When provided, this completely replaces the default fetchUpdateInfo flow.
@@ -104,7 +104,7 @@ export interface HotUpdaterResolver {
      */
     checkUpdate?: (
         params: ResolverCheckUpdateParams,
-    ) => Promise<null>; //Promise<AppUpdateInfo | null>;
+    ) => Promise<AppUpdateInfo | null>;
 
     /**
      * Custom implementation for notifying app ready.
@@ -193,4 +193,35 @@ export function extractSignatureFailure(
         message: normalizedError.message,
         error: normalizedError,
     };
+}
+
+
+export type UpdateStatus = "ROLLBACK" | "UPDATE";
+
+/**
+ * The update info for the database layer.
+ * This is the update info that is used by the database.
+ */
+export interface UpdateInfo {
+    id: string;
+    shouldForceUpdate: boolean;
+    message: string | null;
+    status: UpdateStatus;
+    storageUri: string | null;
+    fileHash: string | null;
+}
+
+/**
+ * The update info for the app layer.
+ * This is the update info that is used by the app.
+ */
+export interface AppUpdateInfo extends Omit<UpdateInfo, "storageUri"> {
+    fileUrl: string | null;
+    /**
+     * SHA256 hash of the bundle file, optionally with embedded signature.
+     * Format when signed: "sig:<base64_signature>"
+     * Format when unsigned: "<hex_hash>" (64-character lowercase hex)
+     * The client parses this to extract signature for native verification.
+     */
+    fileHash: string | null;
 }

@@ -6,8 +6,8 @@ import {
     notifyAppReady as nativeNotifyAppReady,
     reload,
 } from "./native";
-import type { HotUpdaterResolver } from "./types";
-import type { HotUpdaterError } from "./error";
+import type { IpayCodePushResolver } from "./types";
+import type { IpayCodePushError } from "./error";
 import { useEventCallback } from "./hooks/useEventCallback";
 
 
@@ -27,7 +27,7 @@ type UpdateStatus =
 /**
  * Common options shared between auto and manual update modes
  */
-interface CommonHotUpdaterOptions {
+interface CommonIpayCodePushOptions {
     /**
      * Custom request headers for update checks
      */
@@ -52,7 +52,7 @@ interface CommonHotUpdaterOptions {
      *
      * @example
      * ```tsx
-     * HotUpdater.wrap({
+     * IpayCodePush.wrap({
      *   baseURL: "https://api.example.com",
      *   updateMode: "manual",
      *   onNotifyAppReady: ({ status, crashedBundleId }) => {
@@ -91,7 +91,7 @@ interface ResolverConfig {
     /**
      * Custom resolver for network operations
      */
-    resolver: HotUpdaterResolver;
+    resolver: IpayCodePushResolver;
 
     /**
      * baseURL is not allowed when using resolver
@@ -104,7 +104,7 @@ interface ResolverConfig {
  */
 type NetworkConfig = BaseURLConfig | ResolverConfig;
 
-export type AutoUpdateOptions = CommonHotUpdaterOptions & NetworkConfig & {
+export type AutoUpdateOptions = CommonIpayCodePushOptions & NetworkConfig & {
     /**
      * Update strategy
      * - "fingerprint": Use fingerprint hash to check for updates
@@ -118,7 +118,7 @@ export type AutoUpdateOptions = CommonHotUpdaterOptions & NetworkConfig & {
      */
     updateMode: "auto";
 
-    onError?: (error: HotUpdaterError | Error | unknown) => void;
+    onError?: (error: IpayCodePushError | Error | unknown) => void;
 
     /**
      * Component to show while downloading a new bundle update.
@@ -126,10 +126,9 @@ export type AutoUpdateOptions = CommonHotUpdaterOptions & NetworkConfig & {
      * When an update exists and the bundle is being downloaded, this component will block access
      * to the entry point and show download progress.
      *
-     * @see {@link https://hot-updater.dev/docs/react-native-api/wrap#fallback-component}
      *
      * ```tsx
-     * HotUpdater.wrap({
+     * IpayCodePush.wrap({
      *   baseURL: "<update-server-url>",
      *   updateStrategy: "appVersion",
      *   fallbackComponent: ({ progress = 0 }) => (
@@ -161,12 +160,11 @@ export type AutoUpdateOptions = CommonHotUpdaterOptions & NetworkConfig & {
     /**
      * Callback function that is called when the update process is completed.
      *
-     * @see {@link https://hot-updater.dev/docs/react-native-api/wrap#onupdateprocesscompleted}
      */
     onUpdateProcessCompleted?: (response: RunUpdateProcessResponse) => void;
 };
 
-export type ManualUpdateOptions = CommonHotUpdaterOptions & NetworkConfig & {
+export type ManualUpdateOptions = CommonIpayCodePushOptions & NetworkConfig & {
     /**
      * Update mode
      * - "manual": Only notify app ready, user manually calls checkForUpdate()
@@ -174,14 +172,14 @@ export type ManualUpdateOptions = CommonHotUpdaterOptions & NetworkConfig & {
     updateMode: "manual";
 };
 
-export type HotUpdaterOptions = AutoUpdateOptions | ManualUpdateOptions;
+export type IpayCodePushOptions = AutoUpdateOptions | ManualUpdateOptions;
 
 /**
  * Internal options after normalization in index.ts
  * Always has resolver (never baseURL)
  */
 type InternalCommonOptions = {
-    resolver: HotUpdaterResolver;
+    resolver: IpayCodePushResolver;
     requestHeaders?: Record<string, string>;
     requestTimeout?: number;
     onNotifyAppReady?: (result: NotifyAppReadyResult) => void;
@@ -190,7 +188,7 @@ type InternalCommonOptions = {
 type InternalAutoUpdateOptions = InternalCommonOptions & {
     updateStrategy: "fingerprint" | "appVersion";
     updateMode: "auto";
-    onError?: (error: HotUpdaterError | Error | unknown) => void;
+    onError?: (error: IpayCodePushError | Error | unknown) => void;
     fallbackComponent?: React.FC<{
         status: Exclude<UpdateStatus, "UPDATE_PROCESS_COMPLETED">;
         progress: number;
@@ -214,7 +212,7 @@ export type InternalWrapOptions =
  * Helper function to handle notifyAppReady flow
  */
 const handleNotifyAppReady = async (options: {
-    resolver?: HotUpdaterResolver;
+    resolver?: IpayCodePushResolver;
     requestHeaders?: Record<string, string>;
     requestTimeout?: number;
     onNotifyAppReady?: (result: NotifyAppReadyResult) => void;
@@ -232,13 +230,13 @@ const handleNotifyAppReady = async (options: {
                     requestTimeout: options.requestTimeout,
                 })
                 .catch((e: unknown) => {
-                    console.warn("[HotUpdater] Resolver notifyAppReady failed:", e);
+                    console.warn("[IpayCodePush] Resolver notifyAppReady failed:", e);
                 });
         }
 
         options.onNotifyAppReady?.(nativeResult);
     } catch (e) {
-        console.warn("[HotUpdater] Failed to notify app ready:", e);
+        console.warn("[IpayCodePush] Failed to notify app ready:", e);
     }
 };
 
@@ -271,14 +269,14 @@ export function wrap<T extends React.JSX.IntrinsicAttributes = object>(
     return (WrappedComponent: React.ComponentType<T>) => {
         const IpayCodePushHOC: React.FC<T> = (props: T) => {
 
-            //const progress = useHotUpdaterStore((state) => state.progress);
+            //const progress = useIpayCodePushStore((state) => state.progress);
             const progress = 0
 
             const [message, setMessage] = useState<string | null>(null);
 
             const [updateStatus, setUpdateStatus] = useState<UpdateStatus>("CHECK_FOR_UPDATE");
 
-            const initHotUpdater = useEventCallback(async () => {
+            const initIpayCodePush = useEventCallback(async () => {
 
                 try {
                     setUpdateStatus("CHECK_FOR_UPDATE");
@@ -360,7 +358,7 @@ export function wrap<T extends React.JSX.IntrinsicAttributes = object>(
 
             // Start update check
             useLayoutEffect(() => {
-                initHotUpdater();
+                initIpayCodePush();
             }, []);
 
             if (
