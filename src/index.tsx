@@ -56,7 +56,7 @@ const registerGlobalGetBaseURL = () => {
     const fn = getBaseURL;
 
     // Register to globalThis (modern, cross-platform)
-    /* if (typeof globalThis !== "undefined") {
+    if (typeof globalThis !== "undefined") {
 
         if (!globalThis.IpayCodePushGetBaseURL) {
             globalThis.IpayCodePushGetBaseURL = fn;
@@ -68,7 +68,7 @@ const registerGlobalGetBaseURL = () => {
         if (!global.IpayCodePushGetBaseURL) {
             global.IpayCodePushGetBaseURL = fn;
         }
-    } */
+    }
 };
 
 // Call registration immediately on module load
