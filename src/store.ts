@@ -56,7 +56,7 @@ const createIpayCodePushStore = () => {
 
 export const ipayCodePushStore = createIpayCodePushStore();
 
-export const useHotUpdaterStore = <T = IpayCodePushState>(
+export const useIpayCodePushStore = <T = IpayCodePushState>(
     selector: (snapshot: IpayCodePushState) => T = (snapshot) => snapshot as T,
 ) => {
     return useSyncExternalStoreWithSelector(
