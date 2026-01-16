@@ -106,8 +106,6 @@ export interface Spec extends TurboModule {
         CHANNEL: string;
         FINGERPRINT_HASH: string | null;
     };
-
-    multiply(a: number, b: number): number;
 }
 
 export default TurboModuleRegistry.getEnforcing<Spec>('InstantpayCodePush');
