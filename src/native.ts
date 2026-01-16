@@ -11,7 +11,7 @@ export { IpayCodePushErrorCode, isIpayCodePushError };
 
 const NIL_UUID = "00000000-0000-0000-0000-000000000000";
 
-declare const __IPAY_CODE_PUSH_BUNDLE_ID: string | undefined;
+const __IPAY_CODE_PUSH_BUNDLE_ID=undefined;
 
 export const IpayCodePushConstants = {
     IPAY_CODE_PUSH_BUNDLE_ID: __IPAY_CODE_PUSH_BUNDLE_ID || NIL_UUID,

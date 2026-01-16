@@ -9,6 +9,7 @@ import {
 import type { IpayCodePushResolver } from "./types";
 import type { IpayCodePushError } from "./error";
 import { useEventCallback } from "./hooks/useEventCallback";
+import { useIpayCodePushStore } from "./store";
 
 
 export interface RunUpdateProcessResponse {
@@ -269,8 +270,7 @@ export function wrap<T extends React.JSX.IntrinsicAttributes = object>(
     return (WrappedComponent: React.ComponentType<T>) => {
         const IpayCodePushHOC: React.FC<T> = (props: T) => {
 
-            //const progress = useIpayCodePushStore((state) => state.progress);
-            const progress = 0
+            const progress = useIpayCodePushStore((state) => state.progress);
 
             const [message, setMessage] = useState<string | null>(null);
 
@@ -302,6 +302,7 @@ export function wrap<T extends React.JSX.IntrinsicAttributes = object>(
                         return;
                     }
 
+                    //If forceupdate is not allowed for the bunlde
                     if (updateInfo.shouldForceUpdate === false) {
                         void updateInfo.updateBundle().catch((error: unknown) => {
                             restOptions.onError?.(error);

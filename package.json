@@ -38,7 +38,8 @@
     "typecheck": "tsc",
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
     "test": "jest",
-    "release": "release-it --only-version"
+    "release": "release-it --only-version",
+    "generateBundle" : "ruby generateBundle.rb --projectDir /var/www/npm-package/react-native-instantpay-code-push/example --platform ANDROID --enableHermes true"
   },
   "keywords": [
     "react-native",
