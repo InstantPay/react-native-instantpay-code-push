@@ -86,7 +86,7 @@ class MainApplication : Application(), ReactApplication {
             PackageList(this).packages.apply {
                 
             },
-            jsBundleFilePath = HotUpdater.getJSBundleFile(applicationContext), //👈 add this line
+            jsBundleFilePath = IpayCodePush.getJSBundleFile(applicationContext), //👈 add this line
         )
     }
 
