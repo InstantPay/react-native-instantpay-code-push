@@ -33,7 +33,7 @@ android {
   defaultConfig {
     minSdkVersion getExtOrIntegerDefault("minSdkVersion")
     targetSdkVersion getExtOrIntegerDefault("targetSdkVersion")
-
+      consumerProguardFiles 'proguard-rules.pro'
       buildConfigField "long", "BUILD_TIMESTAMP", "${System.currentTimeMillis()}L" //Added For IpayCodePush
 
       //Added For IpayCodePush
