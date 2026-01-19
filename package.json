@@ -1,6 +1,6 @@
 {
   "name": "react-native-instantpay-code-push",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "React Native plugin for the CodePush service",
   "main": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",
@@ -38,8 +38,7 @@
     "typecheck": "tsc",
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
     "test": "jest",
-    "release": "release-it --only-version",
-    "generateBundle" : "ruby generateBundle.rb --projectDir /var/www/npm-package/react-native-instantpay-code-push/example --platform ANDROID --enableHermes true"
+    "release": "release-it --only-version"
   },
   "keywords": [
     "react-native",
