@@ -184,6 +184,7 @@ type InternalCommonOptions = {
     requestHeaders?: Record<string, string>;
     requestTimeout?: number;
     onNotifyAppReady?: (result: NotifyAppReadyResult) => void;
+    debug ?: boolean;
 };
 
 type InternalAutoUpdateOptions = InternalCommonOptions & {
@@ -287,6 +288,7 @@ export function wrap<T extends React.JSX.IntrinsicAttributes = object>(
                         requestHeaders: restOptions.requestHeaders,
                         requestTimeout: restOptions.requestTimeout,
                         onError: restOptions.onError,
+                        debug : restOptions.debug,
                     });
 
                     setMessage(updateInfo?.message ?? null);

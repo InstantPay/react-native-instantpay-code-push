@@ -30,6 +30,8 @@ export interface CheckForUpdateOptions {
      * @default 5000
      */
     requestTimeout?: number;
+
+    debug?: boolean;
 }
 
 export type CheckForUpdateResult = AppUpdateInfo & {
@@ -48,7 +50,7 @@ export interface InternalCheckForUpdateOptions extends CheckForUpdateOptions {
 export async function checkForUpdate(
     options: InternalCheckForUpdateOptions,
 ): Promise<CheckForUpdateResult | null> {
-    if (__DEV__) {
+    if (__DEV__ && !options.debug) {
         console.log('checkForUpdate : Running in dev mode')
         return null;
     }
