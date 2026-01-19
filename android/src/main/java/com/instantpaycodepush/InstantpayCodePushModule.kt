@@ -179,9 +179,4 @@ class InstantpayCodePushModule(reactContext: ReactApplicationContext) : NativeIn
         return impl.getBaseURL()
     }
 
-
-    override fun multiply(a: Double, b: Double): Double {
-        return a * b
-    }
-
 }
