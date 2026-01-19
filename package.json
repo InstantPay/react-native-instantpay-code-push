@@ -43,7 +43,12 @@
   "keywords": [
     "react-native",
     "ios",
-    "android"
+    "android",
+    "ipay",
+    "instantpay",
+    "code-push",
+    "over-the-air",
+    "ipaycodepush"
   ],
   "repository": {
     "type": "git",
