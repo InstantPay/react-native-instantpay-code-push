@@ -37,7 +37,7 @@ export const fetchUpdateInfo = async ({
             throw new Error(response.statusText);
         }
 
-        let outputBundle:any = response.json();
+        let outputBundle:any = await response.json();
 
         if(outputBundle.statuscode == 'TXN'){
             return outputBundle.data;
