@@ -16,13 +16,27 @@ export function createDefaultResolver(baseURL: string): IpayCodePushResolver {
         ): Promise<AppUpdateInfo | null> => {
             // Build URL based on strategy (existing buildUpdateUrl logic)
             let url: string;
+
+            let payloadData = {
+                platform : (params.platform).toUpperCase(),
+                channel : (params.channel).toUpperCase(),
+                minBundleId : params.minBundleId,
+                bundleId : params.bundleId,
+                actionType : '',
+                actionValue : '',
+            }
+
             if (params.updateStrategy === "fingerprint") {
                 if (!params.fingerprintHash) {
                     throw new Error("Fingerprint hash is required");
                 }
-                url = `${baseURL}/fingerprint/${params.platform}/${params.fingerprintHash}/${params.channel}/${params.minBundleId}/${params.bundleId}`;
+                url = `${baseURL}`;
+                payloadData['actionType'] = 'FINGERPRINT';
+                payloadData['actionValue'] = params.fingerprintHash;
             } else {
-                url = `${baseURL}/app-version/${params.platform}/${params.appVersion}/${params.channel}/${params.minBundleId}/${params.bundleId}`;
+                url = `${baseURL}`;
+                payloadData['actionType'] = 'APP_VERSION';
+                payloadData['actionValue'] = params.appVersion;
             }
 
             // Use existing fetchUpdateInfo
@@ -30,6 +44,7 @@ export function createDefaultResolver(baseURL: string): IpayCodePushResolver {
                 url,
                 requestHeaders: params.requestHeaders,
                 requestTimeout: params.requestTimeout,
+                payload : payloadData,
             });
         },
     };

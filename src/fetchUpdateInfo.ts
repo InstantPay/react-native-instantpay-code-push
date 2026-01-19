@@ -5,11 +5,13 @@ export const fetchUpdateInfo = async ({
     requestHeaders,
     onError,
     requestTimeout = 5000,
+    payload
 }: {
     url: string;
     requestHeaders?: Record<string, string>;
     onError?: (error: Error) => void;
     requestTimeout?: number;
+    payload: Record<string, string>;
 }): Promise<AppUpdateInfo | null> => {
     try {
         const controller = new AbortController();
@@ -25,6 +27,8 @@ export const fetchUpdateInfo = async ({
         const response = await fetch(url, {
             signal: controller.signal,
             headers,
+            method: "POST",
+            body : JSON.stringify(payload)
         });
 
         clearTimeout(timeoutId);
