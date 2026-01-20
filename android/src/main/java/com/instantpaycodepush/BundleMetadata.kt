@@ -1,6 +1,5 @@
 package com.instantpaycodepush
 
-import android.util.Log
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
@@ -92,8 +91,7 @@ data class BundleMetadata(
 
                 metadata
             } catch (e: Exception) {
-                CommonHelper.logPrint(CLASS_TAG, "Failed to load metadata from file $e")
-                Log.e(CLASS_TAG, "Failed to load metadata from file", e)
+                CommonHelper.logPrint(CLASS_TAG, "Failed to load metadata from file and Error Message : ${e.message} and Raw Error : $e")
                 null
             }
 
@@ -119,8 +117,7 @@ data class BundleMetadata(
             CommonHelper.logPrint(CLASS_TAG, "Saved metadata to file: ${file.absolutePath}")
             true
         } catch (e: Exception) {
-            CommonHelper.logPrint(CLASS_TAG, "Failed to save metadata to file: $e")
-            Log.e(CLASS_TAG, "Failed to save metadata to file", e)
+            CommonHelper.logPrint(CLASS_TAG, "Failed to save metadata to file! and Error Message : ${e.message} and Raw Error : $e")
             false
         }
 }
@@ -184,8 +181,7 @@ data class CrashedHistory(
                 val json = JSONObject(jsonString)
                 fromJson(json)
             } catch (e: Exception) {
-                CommonHelper.logPrint(CLSSS_TAG, "Failed to load crashed history from file: $e")
-                Log.e(CLSSS_TAG, "Failed to load crashed history from file", e)
+                CommonHelper.logPrint(CLSSS_TAG, "Failed to load crashed history from file! and Error Message : ${e.message} and Raw Error: $e")
                 CrashedHistory()
             }
         }
@@ -206,8 +202,7 @@ data class CrashedHistory(
             CommonHelper.logPrint(CLSSS_TAG, "Saved crashed history to file: ${file.absolutePath}")
             true
         } catch (e: Exception) {
-            CommonHelper.logPrint(CLSSS_TAG, "Failed to save crashed history to file: $e")
-            Log.e(CLSSS_TAG, "Failed to save crashed history to file", e)
+            CommonHelper.logPrint(CLSSS_TAG, "Failed to save crashed history to file and Error Message : ${e.message} and Raw Error: $e")
             false
         }
 

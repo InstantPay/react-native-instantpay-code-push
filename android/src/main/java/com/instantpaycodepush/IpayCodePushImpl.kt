@@ -2,7 +2,6 @@ package com.instantpaycodepush
 
 import android.app.Activity
 import android.content.Context
-import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -294,8 +293,7 @@ class IpayCodePushImpl {
                 reactIntegrationManager.reload(reactApplication)
             }
         } catch (e: Exception) {
-            CommonHelper.logPrint(CLASS_TAG, "Failed to reload application $e")
-            Log.e(CLASS_TAG, "Failed to reload application", e)
+            CommonHelper.logPrint(CommonHelper.ERROR_LOG,CLASS_TAG, "Failed to reload application and Error Message : ${e.message} and Raw Error : $e")
         }
     }
 

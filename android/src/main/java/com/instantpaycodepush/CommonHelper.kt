@@ -17,7 +17,9 @@ object CommonHelper {
 
         val fullTagName = "$MAIN_LOG_TAG $classTag"
 
-        Log.i(fullTagName, value)
+        if(BuildConfig.IpayCodePush_Log){
+            Log.i(fullTagName, value)
+        }
     }
 
     fun logPrint(type:String,classTag:String, value: String?) {
@@ -27,13 +29,15 @@ object CommonHelper {
 
         val fullTagName = "$MAIN_LOG_TAG $classTag"
 
-        if(type == "WARNING_LOG"){
-            Log.i(fullTagName, value)
-        } else if(type == "ERROR_LOG") {
-            Log.e(fullTagName, value)
-        }
-        else{
-            Log.i(fullTagName, value)
+        if(BuildConfig.IpayCodePush_Log){
+            if(type == "WARNING_LOG"){
+                Log.i(fullTagName, value)
+            } else if(type == "ERROR_LOG") {
+                Log.e(fullTagName, value)
+            }
+            else{
+                Log.i(fullTagName, value)
+            }
         }
     }
 }

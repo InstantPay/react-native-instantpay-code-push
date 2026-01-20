@@ -2,7 +2,6 @@ package com.instantpaycodepush
 
 import android.content.Context
 import android.os.StatFs
-import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -168,7 +167,6 @@ class BundleFileStorageService(
             }
         } catch (e: Exception) {
             CommonHelper.logPrint(CLASS_TAG, "Error checking isolationKey: ${e.message}")
-            Log.e(CLASS_TAG, "Error checking isolationKey: ${e.message}")
         }
     }
 
@@ -194,7 +192,6 @@ class BundleFileStorageService(
                         }
                     } catch (e: Exception) {
                         CommonHelper.logPrint(CLASS_TAG,"Error removing bundle ${file.name}: ${e.message}")
-                        Log.e(CLASS_TAG, "Error removing bundle ${file.name}: ${e.message}")
                     }
                 }
             }
@@ -202,7 +199,6 @@ class BundleFileStorageService(
             CommonHelper.logPrint(CLASS_TAG, "Migration cleanup complete: removed $cleanedCount bundles")
         } catch (e: Exception) {
             CommonHelper.logPrint(CLASS_TAG, "Error during migration cleanup: ${e.message}")
-            Log.e(CLASS_TAG, "Error during migration cleanup: ${e.message}")
         }
     }
 
@@ -828,7 +824,6 @@ class BundleFileStorageService(
             ""
         } catch (e: Exception) {
             CommonHelper.logPrint(CLASS_TAG, "Error getting base URL: ${e.message}")
-            Log.e(CLASS_TAG, "Error getting base URL: ${e.message}")
             ""
         }
     }

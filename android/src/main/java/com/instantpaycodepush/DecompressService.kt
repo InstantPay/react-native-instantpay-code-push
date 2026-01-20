@@ -1,6 +1,5 @@
 package com.instantpaycodepush
 
-import android.util.Log
 import java.io.File
 
 /**
@@ -64,7 +63,7 @@ class DecompressService {
             Please verify the file is not corrupted and matches one of the supported formats.
             """.trimIndent()
 
-        Log.e(CLASS_TAG, errorMessage)
+        CommonHelper.logPrint(CommonHelper.ERROR_LOG,CLASS_TAG, errorMessage)
         return false
     }
 

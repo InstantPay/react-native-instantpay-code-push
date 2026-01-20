@@ -40,6 +40,9 @@ android {
       def minBundleId = project.hasProperty("MIN_BUNDLE_ID") ? project.properties["MIN_BUNDLE_ID"] : null
       buildConfigField "String", "MIN_BUNDLE_ID", minBundleId == null ? "\"null\"" : "\"${minBundleId}\""
 
+      //For Debug Log
+      def ipayCodePushLogEnable = project.hasProperty("IpayCodePush_Log") ? project.properties["IpayCodePush_Log"] : null
+      buildConfigField "boolean", "IpayCodePush_Log", ipayCodePushLogEnable == null ? "false" : "${ipayCodePushLogEnable}"
 
   }
 
