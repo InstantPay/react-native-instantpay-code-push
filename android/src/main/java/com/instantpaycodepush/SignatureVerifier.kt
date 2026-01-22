@@ -1,12 +1,20 @@
 package com.instantpaycodepush
 
 import android.content.Context
+import android.net.Uri
+import android.security.keystore.KeyGenParameterSpec
+import android.security.keystore.KeyProperties
 import android.util.Base64
 import java.io.File
 import java.security.KeyFactory
+import java.security.KeyPairGenerator
+import java.security.KeyStore
 import java.security.PublicKey
 import java.security.Signature
 import java.security.spec.X509EncodedKeySpec
+import javax.crypto.Cipher
+import javax.crypto.spec.IvParameterSpec
+import javax.crypto.spec.SecretKeySpec
 
 /**
  * Prefix for signed file hash format.
@@ -71,6 +79,13 @@ sealed class SignatureVerificationException(
     ) : SignatureVerificationException(
         "Security framework error during verification: ${cause.message}",
     )
+
+    class KeyStoreFailed(
+        cause: Throwable,
+    ) :
+        SignatureVerificationException(
+            "Failed to generate KeyStore: ${cause.message}",
+        )
 }
 
 
@@ -350,4 +365,128 @@ object SignatureVerifier {
             throw SignatureVerificationException.InvalidSignatureFormat()
         }
     }
+
+    private const val KEY_ALIAS = "com.ipaycodepush.security.rsa"
+
+    /**
+     * Generate a new EC key pair entry in the Android Keystore by
+     * using the KeyPairGenerator API. The private key can only be
+     * used for signing or verification and only with SHA-256 or
+     * SHA-512 as the message digest.
+     */
+    private fun generateKeyStore(){
+
+        val existingKeyStore = KeyStore.getInstance("AndroidKeyStore")
+        existingKeyStore.load(null)
+
+        if (existingKeyStore.containsAlias(KEY_ALIAS)) return
+
+        val kpg = KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_RSA, "AndroidKeyStore")
+
+        val spec = KeyGenParameterSpec.Builder(
+            KEY_ALIAS,
+            KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
+        )
+            .setKeySize(2048)
+            .setEncryptionPaddings(
+                KeyProperties.ENCRYPTION_PADDING_RSA_PKCS1
+            )
+            .setDigests(
+                KeyProperties.DIGEST_SHA256,
+                KeyProperties.DIGEST_SHA512
+            )
+            .build()
+
+        kpg.initialize(spec)
+        kpg.generateKeyPair()
+    }
+
+    /**
+     * Get Public Key from KeyStore
+     */
+    fun getPublicKeyBase64(): String{
+
+        try {
+            val keyStore = KeyStore.getInstance("AndroidKeyStore")
+            keyStore.load(null)
+
+            // Generate key if not exists
+            if (!keyStore.containsAlias(KEY_ALIAS)) {
+                generateKeyStore()
+            }
+
+            // Get public key
+            val entry = keyStore.getEntry(
+                KEY_ALIAS,
+                null
+            ) as KeyStore.PrivateKeyEntry
+
+            return Base64.encodeToString(
+                entry.certificate.publicKey.encoded,
+                Base64.NO_WRAP
+            )
+        }
+        catch (e: Exception) {
+            CommonHelper.logPrint(CommonHelper.ERROR_LOG, CLASS_TAG, "Failed to generate keystore Error Message: ${e.message} and Raw Error : $e")
+            throw SignatureVerificationException.KeyStoreFailed(e)
+        }
+    }
+
+    /**
+     * Decrypt signature from bundle Url.
+     * @param bundleUrl The signed url
+     * @return plan Url to downlaod Bundle
+     */
+    fun decryptSignatureUrl(bundleUrl: String?): String {
+
+        try {
+
+            val parseUri = Uri.parse(bundleUrl)
+
+            val signatureData = parseUri.getQueryParameter("signatureData")
+
+            val encryptedKey = parseUri.getQueryParameter("itemData")
+
+            val rawIv = parseUri.getQueryParameter("raw")
+
+            //Decrypt AES Key (RSA)
+            val ks = KeyStore.getInstance("AndroidKeyStore")
+            ks.load(null)
+
+            val privateKey = (ks.getEntry(
+                KEY_ALIAS,
+                null
+            ) as KeyStore.PrivateKeyEntry).privateKey
+
+            val rsaCipher = Cipher.getInstance("RSA/ECB/PKCS1Padding")
+            rsaCipher.init(Cipher.DECRYPT_MODE, privateKey)
+
+            val aesKeyBytes = rsaCipher.doFinal(
+                Base64.decode(encryptedKey, Base64.DEFAULT)
+            )
+
+            //Decrypt Payload (AES)
+            val secretKey = SecretKeySpec(aesKeyBytes, "AES")
+
+            val aesCipher = Cipher.getInstance("AES/CBC/PKCS7Padding")
+            aesCipher.init(
+                Cipher.DECRYPT_MODE,
+                secretKey,
+                IvParameterSpec(Base64.decode(rawIv, Base64.DEFAULT))
+            )
+
+            val finalData = aesCipher.doFinal(
+                Base64.decode(signatureData, Base64.DEFAULT)
+            )
+
+            val planData = String(finalData, Charsets.UTF_8)
+
+            return planData
+        }
+        catch (e: Exception){
+            CommonHelper.logPrint(CommonHelper.ERROR_LOG, CLASS_TAG, "Failed to decrypt bundleUrl Signature Url; Error Message: ${e.message} and Raw Error : $e")
+            return  ""
+        }
+    }
+
 }

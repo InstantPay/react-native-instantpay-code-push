@@ -16,6 +16,7 @@ import kotlinx.coroutines.launch
 
 import android.os.Handler
 import android.os.Looper
+import org.json.JSONObject
 
 
 @ReactModule(name = InstantpayCodePushModule.NAME)
@@ -86,11 +87,28 @@ class InstantpayCodePushModule(reactContext: ReactApplicationContext) : NativeIn
 
                 val fileHash = params.getString("fileHash")
 
+                //Verify Bundle Url Signature
+                val decryptSignatureData = SignatureVerifier.decryptSignatureUrl(fileUrl)
+
+                if (decryptSignatureData.isEmpty()){
+                    promise.reject("INVALID_URL_SIGNATURE", "Invalid 'fileUrl' Signature: $fileUrl")
+                    return@launch
+                }
+
+                val planSignatureData = JSONObject(decryptSignatureData)
+
+                if(planSignatureData.getString("fileHash") != fileHash){
+                    promise.reject("INVALID_URL_SIGNATURE", "Invalid 'fileUrl' Hash: $fileUrl")
+                    return@launch
+                }
+
+                val fileUrlPlan = planSignatureData.getString("bundleUrl")
+
                 val impl = getInstance()
 
                 impl.updateBundle(
                     bundleId,
-                    fileUrl,
+                    fileUrlPlan,
                     fileHash,
                 ) { progress ->
                     // Post to Main thread for React Native event emission
@@ -127,6 +145,7 @@ class InstantpayCodePushModule(reactContext: ReactApplicationContext) : NativeIn
         constants["APP_VERSION"] = IpayCodePush.getAppVersion(mReactApplicationContext)
         constants["CHANNEL"] = IpayCodePush.getChannel(mReactApplicationContext)
         constants["FINGERPRINT_HASH"] = IpayCodePush.getFingerprintHash(mReactApplicationContext)
+        constants["KEYSTORE_PUBLIC_KEY"] = IpayCodePush.getKeyStorePublicKey()
         return constants
     }
 
@@ -178,5 +197,4 @@ class InstantpayCodePushModule(reactContext: ReactApplicationContext) : NativeIn
         val impl = getInstance()
         return impl.getBaseURL()
     }
-
 }

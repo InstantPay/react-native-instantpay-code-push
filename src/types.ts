@@ -174,7 +174,8 @@ export function isSignatureVerificationError(error: unknown): boolean {
         message.includes("public key not configured") ||
         message.includes("public key format is invalid") ||
         message.includes("signature format is invalid") ||
-        message.includes("bundle may be corrupted or tampered")
+        message.includes("bundle may be corrupted or tampered") ||
+        message.includes("KeyStore")
     );
 }
 

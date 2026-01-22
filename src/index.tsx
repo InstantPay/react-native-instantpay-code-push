@@ -19,6 +19,7 @@ import {
     reload,
     type UpdateParams,
     updateBundle,
+    getPublicKey,
 } from "./native";
 
 import { ipayCodePushStore } from "./store";
@@ -371,6 +372,18 @@ function createIpayCodePushClient() {
          * ```
          */
         clearCrashHistory,
+
+        /**
+         * Get Public Key which is generated for the particular device
+         * 
+         * @returns {string} Public key
+         * @example
+         * ```ts
+         * IpayCodePush.getPublicKey();
+         * ```
+         */
+        getPublicKey,
+
     };
 }
 

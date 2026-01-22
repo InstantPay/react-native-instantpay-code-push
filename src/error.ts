@@ -33,6 +33,13 @@ export enum IpayCodePushErrorCode {
      */
     INVALID_FILE_URL = "INVALID_FILE_URL",
 
+    /**
+     * File URL Signature is invalid or malformed.
+     * Thrown when fileUrl parameter cannot be verified as a valid URL.
+     * @retryable false
+     */
+    INVALID_URL_SIGNATURE = "INVALID_URL_SIGNATURE",
+
     // ==================== Bundle Storage Errors ====================
 
     /**

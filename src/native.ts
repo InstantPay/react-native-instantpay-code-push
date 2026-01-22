@@ -278,3 +278,14 @@ export const getBaseURL = (): string | null => {
     }
     return null;
 };
+
+
+/**
+ * Fetches the Public Key for the app.
+ *
+ * @returns {string | null} Resolves with the public key
+ */
+export const getPublicKey = (): string | null => {
+    const constants = IpayCodePushNative.getConstants();
+    return constants.KEYSTORE_PUBLIC_KEY;
+};

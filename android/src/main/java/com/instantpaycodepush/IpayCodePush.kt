@@ -97,5 +97,10 @@ class IpayCodePush {
             } else {
                 null
             }
+
+        /**
+         * Get Public Key From KeyStore
+         */
+        fun getKeyStorePublicKey(): String = SignatureVerifier.getPublicKeyBase64()
     }
 }

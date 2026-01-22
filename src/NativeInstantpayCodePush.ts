@@ -105,6 +105,7 @@ export interface Spec extends TurboModule {
         APP_VERSION: string | null;
         CHANNEL: string;
         FINGERPRINT_HASH: string | null;
+        KEYSTORE_PUBLIC_KEY: string | null;
     };
 }
 
