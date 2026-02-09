@@ -16,5 +16,9 @@ Pod::Spec.new do |s|
   s.source_files = "ios/**/*.{h,m,mm,swift,cpp}"
   s.private_header_files = "ios/**/*.h"
 
+  # SWCompression dependency for ZIP/TAR/GZIP/Brotli extraction support
+  # Native Compression framework is used for GZIP and Brotli decompression
+  s.dependency "SWCompression", "~> 4.8.0"
+
   install_modules_dependencies(s)
 end
