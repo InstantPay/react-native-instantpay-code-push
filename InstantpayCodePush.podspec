@@ -14,8 +14,8 @@ Pod::Spec.new do |s|
   s.source       = { :git => "https://github.com/InstantPay/react-native-instantpay-code-push.git", :tag => "#{s.version}" }
 
   s.source_files = "ios/**/*.{h,m,mm,swift,cpp}"
-  s.public_header_files = "ios/**/*.h"
-  #s.private_header_files = "ios/**/*.h"
+  s.public_header_files = "ios/IpayCodePush/Public/*.h"
+  s.private_header_files = "ios/IpayCodePush/Private/*.h"
 
   s.pod_target_xcconfig = {
     "DEFINES_MODULE" => "YES",
