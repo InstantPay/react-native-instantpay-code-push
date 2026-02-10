@@ -54,7 +54,7 @@ NSNotificationName const IpayCodePushDownloadDidFinishNotification = @"IpayCodeP
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
-//RCT_EXPORT_MODULE();
+RCT_EXPORT_MODULE();
 
 #pragma mark - Singleton Instance
 
@@ -341,9 +341,9 @@ NSNotificationName const IpayCodePushDownloadDidFinishNotification = @"IpayCodeP
     return std::make_shared<facebook::react::NativeInstantpayCodePushSpecJSI>(params);
 }
 
-+ (NSString *)moduleName
-{
-  return @"InstantpayCodePush";
-}
+//+ (NSString *)moduleName
+//{
+//  return @"InstantpayCodePush";
+//}
 
 @end
