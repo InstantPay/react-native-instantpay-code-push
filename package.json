@@ -1,6 +1,6 @@
 {
   "name": "react-native-instantpay-code-push",
-  "version": "1.1.8",
+  "version": "1.1.9",
   "description": "React Native plugin for the CodePush service",
   "main": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",
