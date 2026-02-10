@@ -14,7 +14,13 @@ Pod::Spec.new do |s|
   s.source       = { :git => "https://github.com/InstantPay/react-native-instantpay-code-push.git", :tag => "#{s.version}" }
 
   s.source_files = "ios/**/*.{h,m,mm,swift,cpp}"
+  s.public_header_files = "ios/InstantpayCodePush.h"
   s.private_header_files = "ios/**/*.h"
+
+  s.pod_target_xcconfig = {
+    "DEFINES_MODULE" => "YES",
+    "OTHER_SWIFT_FLAGS" => "-enable-experimental-feature AccessLevelOnImport"
+  }
 
   # SWCompression dependency for ZIP/TAR/GZIP/Brotli extraction support
   # Native Compression framework is used for GZIP and Brotli decompression
