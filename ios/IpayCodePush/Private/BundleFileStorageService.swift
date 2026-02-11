@@ -469,7 +469,7 @@ class BundleFileStorageService: BundleStorageService {
             IpayCodePushHelper.logPrint(classTag: CLASS_TAG, log: "Directory contents: \(contents)")
             
             // Check for iOS bundle file directly
-            let iosBundlePath = (directoryPath as NSString).appendingPathComponent("index.ios.bundle")
+            let iosBundlePath = (directoryPath as NSString).appendingPathComponent(".ipay-bundle/bundle/index.ios.bundle")
             if self.fileSystem.fileExists(atPath: iosBundlePath) {
                 IpayCodePushHelper.logPrint(classTag: CLASS_TAG, log: "Found iOS bundle atPath: \(iosBundlePath)")
                 return .success(iosBundlePath)

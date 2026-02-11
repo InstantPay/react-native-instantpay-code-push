@@ -21,7 +21,7 @@ import os
             return
         }
         
-        let fullTagName = "\(MAIN_LOG_TAG) \(classTag)"
+        let fullTagName = "\(MAIN_LOG_TAG) \(classTag) \(String(describing: log))"
         
         if let isEnableLog: Bool = Bundle.main.object(forInfoDictionaryKey: "IpayCodePush_Log") as! Bool? {
             if(isEnableLog){
@@ -36,7 +36,7 @@ import os
             return
         }
         
-        let fullTagName = "\(MAIN_LOG_TAG) \(classTag)"
+        let fullTagName = "\(MAIN_LOG_TAG) \(classTag) \(String(describing: log))"
         
         if let isEnableLog: Bool = Bundle.main.object(forInfoDictionaryKey: "IpayCodePush_Log") as! Bool? {
             if(isEnableLog){

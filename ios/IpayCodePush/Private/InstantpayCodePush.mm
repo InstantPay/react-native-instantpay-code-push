@@ -43,14 +43,14 @@ NSNotificationName const IpayCodePushDownloadDidFinishNotification = @"IpayCodeP
 
 // Clean up observers when module is invalidated or deallocated
 - (void)invalidate {
-    RCTLogInfo(@"[InstantpayCodePush.mm] invalidate called, removing observers.");
+    //RCTLogInfo(@"[InstantpayCodePush.mm] invalidate called, removing observers.");
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     // Swift side should handle KVO observer removal for its tasks
     [super invalidate];
 }
 
 - (void)dealloc {
-    RCTLogInfo(@"[InstantpayCodePush.mm] dealloc called, removing observers.");
+    //RCTLogInfo(@"[InstantpayCodePush.mm] dealloc called, removing observers.");
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
@@ -95,17 +95,17 @@ RCT_EXPORT_MODULE();
                      // Convert timestamp (milliseconds) to UUID v7
                      uint64_t timestampMs = [customValue longLongValue];
                      uuid = [self generateUUIDv7FromTimestamp:timestampMs];
-                     RCTLogInfo(@"[InstantpayCodePush.mm] Using timestamp %@ as MIN_BUNDLE_ID: %@", customValue, uuid);
+                     //RCTLogInfo(@"[InstantpayCodePush.mm] Using timestamp %@ as MIN_BUNDLE_ID: %@", customValue, uuid);
                  } else {
                      // Use as UUID directly
                      uuid = customValue;
-                     RCTLogInfo(@"[InstantpayCodePush.mm] Using custom MIN_BUNDLE_ID from Info.plist: %@", uuid);
+                     //RCTLogInfo(@"[InstantpayCodePush.mm] Using custom MIN_BUNDLE_ID from Info.plist: %@", uuid);
                  }
                  return;
              }
         
             // Step 3: Fallback to default logic (26-hour subtraction)
-            RCTLogInfo(@"[InstantpayCodePush.mm] No custom MIN_BUNDLE_ID found, using default calculation");
+            //RCTLogInfo(@"[InstantpayCodePush.mm] No custom MIN_BUNDLE_ID found, using default calculation");
         
             NSString *compileDateStr = [NSString stringWithFormat:@"%s %s", __DATE__, __TIME__];
             NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
@@ -117,7 +117,7 @@ RCT_EXPORT_MODULE();
             NSDate *buildDate = [formatter dateFromString:compileDateStr];
             
             if (!buildDate) {
-                RCTLogWarn(@"[InstantpayCodePush.mm] Could not parse build date: %@", compileDateStr);
+                //RCTLogWarn(@"[InstantpayCodePush.mm] Could not parse build date: %@", compileDateStr);
                 uuid = @"00000000-0000-0000-0000-000000000000";
                 return;
             }
@@ -218,7 +218,7 @@ RCT_EXPORT_MODULE();
 
 - (void)handleDownloadCompletion:(NSNotification *)notification {
       NSURLSessionTask *task = notification.object; // Task that finished
-      RCTLogInfo(@"[InstantpayCodePush.mm] Received download completion notification for task: %@", task.originalRequest.URL);
+      //RCTLogInfo(@"[InstantpayCodePush.mm] Received download completion notification for task: %@", task.originalRequest.URL);
       // Swift side handles KVO observer removal internally now when task finishes.
       // No specific cleanup needed here based on this notification anymore.
 }
@@ -247,21 +247,21 @@ RCT_EXPORT_MODULE();
 
 - (void)reload:(RCTPromiseResolveBlock)resolve
         reject:(RCTPromiseRejectBlock)reject {
-    RCTLogInfo(@"[InstantpayCodePush.mm] IpayCodePush requested a reload");
+    //RCTLogInfo(@"[InstantpayCodePush.mm] IpayCodePush requested a reload");
     dispatch_async(dispatch_get_main_queue(), ^{
         @try {
             IpayCodePushImpl *impl = [InstantpayCodePush sharedImpl];
             NSURL *bundleURL = [impl bundleURLWithBundle:[NSBundle mainBundle]];
-            RCTLogInfo(@"[InstantpayCodePush.mm] Reloading with bundle URL: %@", bundleURL);
+            //RCTLogInfo(@"[InstantpayCodePush.mm] Reloading with bundle URL: %@", bundleURL);
             if (bundleURL && super.bridge) {
                 [super.bridge setValue:bundleURL forKey:@"bundleURL"];
             } else if (!super.bridge) {
-                RCTLogWarn(@"[InstantpayCodePush.mm] Bridge is nil, cannot set bundleURL for reload.");
+                //RCTLogWarn(@"[InstantpayCodePush.mm] Bridge is nil, cannot set bundleURL for reload.");
             }
             RCTTriggerReloadCommandListeners(@"IpayCodePush requested a reload");
             resolve(nil);
         } @catch (NSError *error) {
-            RCTLogError(@"[InstantpayCodePush.mm] Failed to reload: %@", error);
+            //RCTLogError(@"[InstantpayCodePush.mm] Failed to reload: %@", error);
             reject(@"RELOAD_ERROR", error.description, error);
         }
     });
@@ -270,7 +270,7 @@ RCT_EXPORT_MODULE();
 - (void)updateBundle:(JS::NativeInstantpayCodePush::UpdateBundleParams &)params
              resolve:(RCTPromiseResolveBlock)resolve
               reject:(RCTPromiseRejectBlock)reject {
-    NSLog(@"[InstantpayCodePush.mm] updateBundle called.");
+    //NSLog(@"[InstantpayCodePush.mm] updateBundle called.");
     NSMutableDictionary *paramDict = [NSMutableDictionary dictionary];
     if (params.bundleId()) {
         paramDict[@"bundleId"] = params.bundleId();
@@ -291,27 +291,27 @@ RCT_EXPORT_MODULE();
     if (params.bundleId()) {
         bundleId = params.bundleId();
     }
-    NSLog(@"[InstantpayCodePush.mm] notifyAppReady called with bundleId: %@", bundleId);
+    //NSLog(@"[InstantpayCodePush.mm] notifyAppReady called with bundleId: %@", bundleId);
     IpayCodePushImpl *impl = [InstantpayCodePush sharedImpl];
     return [impl notifyAppReadyWithBundleId:bundleId];
 }
 
 - (NSArray<NSString *> *)getCrashHistory {
-    NSLog(@"[InstantpayCodePush.mm] getCrashHistory called");
+    //NSLog(@"[InstantpayCodePush.mm] getCrashHistory called");
     IpayCodePushImpl *impl = [InstantpayCodePush sharedImpl];
     NSArray<NSString *> *crashHistory = [impl getCrashHistory];
     return crashHistory ?: @[];
 }
 
 - (NSNumber *)clearCrashHistory {
-    NSLog(@"[InstantpayCodePush.mm] clearCrashHistory called");
+    //NSLog(@"[InstantpayCodePush.mm] clearCrashHistory called");
     IpayCodePushImpl *impl = [InstantpayCodePush sharedImpl];
     BOOL result = [impl clearCrashHistory];
     return @(result);
 }
 
 - (NSString *)getBaseURL {
-    NSLog(@"[InstantpayCodePush.mm] getBaseURL called");
+    //NSLog(@"[InstantpayCodePush.mm] getBaseURL called");
     IpayCodePushImpl *impl = [InstantpayCodePush sharedImpl];
     NSString *baseURL = [impl getBaseURL];
     return baseURL ?: @"";

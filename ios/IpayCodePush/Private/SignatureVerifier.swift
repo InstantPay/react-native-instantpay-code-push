@@ -360,15 +360,18 @@ public class SignatureVerifier {
     *  Get Device Public Key of generated KeyChain
     */
     public static func getDevicePublicKeyBase64() -> String? {
-
-        if let existingKey = getPrivateKey() {
-            return exportPublicKeyBase64(from: existingKey)
+        
+        if let privateKey = getPrivateKey() {
+            return exportPublicKeyBase64(from: privateKey)
         }
 
-        // If not exists → generate
-        generateKeyChain()
-        guard let newKey = getPrivateKey() else { return nil }
-        return exportPublicKeyBase64(from: newKey)
+        // Generate key
+        guard let privateKey = generateKeyChain() else {
+            IpayCodePushHelper.logPrint(classTag: CLASS_TAG, log: "Key generation failed")
+            return nil
+        }
+
+        return exportPublicKeyBase64(from: privateKey)
     }
     
     /**
@@ -376,21 +379,35 @@ public class SignatureVerifier {
     * using the KeyPairGenerator API.
     */
     
-    private static func generateKeyChain() -> Void {
+    private static func generateKeyChain() -> SecKey? {
         
         let tagData = KEY_ALIAS.data(using: .utf8)!
+
+        let access = SecAccessControlCreateWithFlags(
+            nil,
+            kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly,
+            [],
+            nil
+        )
 
         let attributes: [String: Any] = [
             kSecAttrKeyType as String: kSecAttrKeyTypeRSA,
             kSecAttrKeySizeInBits as String: 2048,
-            kSecAttrTokenID as String: kSecAttrTokenIDSecureEnclave,
             kSecPrivateKeyAttrs as String: [
                 kSecAttrIsPermanent as String: true,
-                kSecAttrApplicationTag as String: tagData
+                kSecAttrApplicationTag as String: tagData,
+                kSecAttrAccessControl as String: access as Any
             ]
         ]
 
-        SecKeyCreateRandomKey(attributes as CFDictionary, nil)
+        var error: Unmanaged<CFError>?
+        let privateKey = SecKeyCreateRandomKey(attributes as CFDictionary, &error)
+
+        if let error = error {
+            IpayCodePushHelper.logPrint(classTag: CLASS_TAG, log: "Key generation error: \(error.takeRetainedValue() as Any)")
+        }
+
+        return privateKey
     }
     
     /**
@@ -408,8 +425,14 @@ public class SignatureVerifier {
         ]
 
         var item: CFTypeRef?
-        SecItemCopyMatching(query as CFDictionary, &item)
-        return (item as! SecKey?)
+        let status = SecItemCopyMatching(query as CFDictionary, &item)
+
+        if status != errSecSuccess {
+            IpayCodePushHelper.logPrint(classTag: CLASS_TAG, log: "Key fetch error: \(status)")
+            return nil
+        }
+
+        return (item as! SecKey)
     }
     
     /**
@@ -417,8 +440,16 @@ public class SignatureVerifier {
     */
     private static func exportPublicKeyBase64(from privateKey: SecKey) -> String? {
 
-        guard let publicKey = SecKeyCopyPublicKey(privateKey) else { return nil }
-        guard let data = SecKeyCopyExternalRepresentation(publicKey, nil) as Data? else { return nil }
+        guard let publicKey = SecKeyCopyPublicKey(privateKey) else {
+            IpayCodePushHelper.logPrint(classTag: CLASS_TAG, log: "Cannot get public key")
+            return nil
+        }
+
+        var error: Unmanaged<CFError>?
+        guard let data = SecKeyCopyExternalRepresentation(publicKey, &error) as Data? else {
+            IpayCodePushHelper.logPrint(classTag: CLASS_TAG, log: "Export error: \(error?.takeRetainedValue() as Any)")
+            return nil
+        }
 
         return data.base64EncodedString()
     }

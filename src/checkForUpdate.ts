@@ -55,11 +55,6 @@ export async function checkForUpdate(
         return null;
     }
 
-    if(Platform.OS == 'ios'){
-        console.log("Under Development in iOS Platform");
-        return null;
-    }
-
     if (!["ios", "android"].includes(Platform.OS)) {
         options.onError?.(
             new IpayCodePushError("IpayCodePush is only supported on iOS and Android"),
