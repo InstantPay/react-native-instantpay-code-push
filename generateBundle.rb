@@ -95,7 +95,7 @@ def setup_build(config)
         projectDir: projectDir,
         outputDir: config[:outputDir],
         buildPath: tempBundle,
-        platform: config[:platform],
+        platform: config[:platform].downcase,
     })
 
     #
@@ -514,12 +514,21 @@ def copyDirExcluding(src, dest, exclude: [])
     FileUtils.mkdir_p(dest)
 
     Dir.glob("#{src}/**/*", File::FNM_DOTMATCH).each do |path|
-        next if path =~ /\/\.\.?$/ # skip . and ..
+        base = File.basename(path).strip
+
+        # Skip . and ..
+        next if base == "." || base == ".."
+
+        # Skip excluded files
+        if exclude.map(&:strip).include?(base)
+            log("Skipping file: #{path}", "warning")
+            next
+        end
 
         relative = path.sub("#{src}/", "")
-        next if exclude.any? { |pattern| File.fnmatch?(pattern, relative) }
-
         target = File.join(dest, relative)
+
+        #log("Copying #{path} to #{target}", "info")
 
         if File.directory?(path)
             FileUtils.mkdir_p(target)
