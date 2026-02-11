@@ -94,6 +94,10 @@ import React
         return "ipaycodepush_\(baseKey)_\(appChannel)_"
     }
     
+    public static var getKeyChainPublickey: String {
+        return SignatureVerifier.getDevicePublicKeyBase64() ?? ""
+    }
+    
     // MARK: - Channel Management
     
     /**

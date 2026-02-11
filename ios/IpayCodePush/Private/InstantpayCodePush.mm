@@ -328,7 +328,7 @@ RCT_EXPORT_MODULE();
         .APP_VERSION = [IpayCodePushImpl appVersion],
         .CHANNEL = [impl getChannel],
         .FINGERPRINT_HASH = [impl getFingerprintHash],
-        .KEYSTORE_PUBLIC_KEY = nil
+        .KEYSTORE_PUBLIC_KEY = [IpayCodePushImpl getKeyChainPublickey],
     });
 }
 

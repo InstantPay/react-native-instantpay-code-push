@@ -300,7 +300,7 @@ public class SignatureVerifier {
      */
     private static func createPublicKey(from publicKeyPEM: String) -> Result<SecKey, SignatureVerificationError> {
         // Remove PEM headers/footers and whitespace
-        var keyString = publicKeyPEM
+        let keyString = publicKeyPEM
             .replacingOccurrences(of: "-----BEGIN PUBLIC KEY-----", with: "")
             .replacingOccurrences(of: "-----END PUBLIC KEY-----", with: "")
             .replacingOccurrences(of: "\\n", with: "")
@@ -354,5 +354,73 @@ public class SignatureVerifier {
         return data
     }
     
+    private static let KEY_ALIAS = "com.ipaycodepush.security.rsa"
+    
+    /**
+    *  Get Device Public Key of generated KeyChain
+    */
+    public static func getDevicePublicKeyBase64() -> String? {
+
+        if let existingKey = getPrivateKey() {
+            return exportPublicKeyBase64(from: existingKey)
+        }
+
+        // If not exists → generate
+        generateKeyChain()
+        guard let newKey = getPrivateKey() else { return nil }
+        return exportPublicKeyBase64(from: newKey)
+    }
+    
+    /**
+    * Generate a new EC key pair entry in the Ios Keychain by
+    * using the KeyPairGenerator API.
+    */
+    
+    private static func generateKeyChain() -> Void {
+        
+        let tagData = KEY_ALIAS.data(using: .utf8)!
+
+        let attributes: [String: Any] = [
+            kSecAttrKeyType as String: kSecAttrKeyTypeRSA,
+            kSecAttrKeySizeInBits as String: 2048,
+            kSecAttrTokenID as String: kSecAttrTokenIDSecureEnclave,
+            kSecPrivateKeyAttrs as String: [
+                kSecAttrIsPermanent as String: true,
+                kSecAttrApplicationTag as String: tagData
+            ]
+        ]
+
+        SecKeyCreateRandomKey(attributes as CFDictionary, nil)
+    }
+    
+    /**
+     * Get Private Key of device keychain
+     */
+    private static func getPrivateKey() -> SecKey? {
+
+        let tagData = KEY_ALIAS.data(using: .utf8)!
+
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassKey,
+            kSecAttrApplicationTag as String: tagData,
+            kSecAttrKeyType as String: kSecAttrKeyTypeRSA,
+            kSecReturnRef as String: true
+        ]
+
+        var item: CFTypeRef?
+        SecItemCopyMatching(query as CFDictionary, &item)
+        return (item as! SecKey?)
+    }
+    
+    /**
+    * Get Public key of generated Private Key
+    */
+    private static func exportPublicKeyBase64(from privateKey: SecKey) -> String? {
+
+        guard let publicKey = SecKeyCopyPublicKey(privateKey) else { return nil }
+        guard let data = SecKeyCopyExternalRepresentation(publicKey, nil) as Data? else { return nil }
+
+        return data.base64EncodedString()
+    }
     
 }
