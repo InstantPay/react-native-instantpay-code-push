@@ -170,7 +170,7 @@ def bundleCommand(options)
 
         #If Sourcemap Required in case of enable hermes
         if sourcemap
-            #Update Bundle Id in generated index.android.bundle
+            #Update Bundle Id in generated bundle file
             setBundleIdInMinifyJs("#{bundleOutput}",bundleId)
 
             #verify Bundle Id from Bundle Package
@@ -184,7 +184,7 @@ def bundleCommand(options)
 
             log("Verified Bundle Id with Minify Bundle Package [#{getBundelIdFromMinifyJs}]","info")
 
-            #Update Bundle Id in generated index.android.bundle.map
+            #Update Bundle Id in generated map bundle file
             setBundleIdInMapJs("#{bundleOutput}.map",bundleId)
 
             #verify Bundle Id from Map Bundle Package
@@ -200,7 +200,7 @@ def bundleCommand(options)
         else
 
             if isMinifyEnable
-                #Update Bundle Id in generated index.android.bundle
+                #Update Bundle Id in generated bundle file
                 setBundleIdInMinifyJs("#{bundleOutput}",bundleId)
 
                 #verify Bundle Id from Bundle Package
@@ -215,7 +215,7 @@ def bundleCommand(options)
                 log("Verified Bundle Id with Minify Bundle Package [#{getBundelIdFromMinifyJs}]","info")
 
             else
-                #Update Bundle Id in generated index.android.bundle
+                #Update Bundle Id in generated bundle file
                 setBundleIdInJs("#{bundleOutput}",bundleId)
 
                 #verify Bundle Id from Bundle Package
@@ -437,13 +437,13 @@ def zipCompressBundle(options)
     destinationDir = bundleFolder
 
     copyDirExcluding(sourceDir,destinationDir,exclude: [
-        "index.android.bundle",
-        "index.android.bundle.map"
+        "index.#{platform}.bundle",
+        "index.#{platform}.bundle.map"
     ])
 
     log("Bundle Dir : #{bundleFolder}")
 
-    File.rename("#{bundleFolder}/index.android.bundle.hbc", "#{bundleFolder}/index.android.bundle")
+    File.rename("#{bundleFolder}/index.#{platform}.bundle.hbc", "#{bundleFolder}/index.#{platform}.bundle")
 
     bundleZipOutput = File.join(projectDir,outputDir,"bundle.zip")
 
