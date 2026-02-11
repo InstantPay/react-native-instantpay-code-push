@@ -1,8 +1,13 @@
-#import <InstantpayCodePushSpec/InstantpayCodePushSpec.h>
 #import <React/RCTEventEmitter.h>
 #import <React/RCTBundleURLProvider.h>
 
+#ifdef RCT_NEW_ARCH_ENABLED
+#import <InstantpayCodePushSpec/InstantpayCodePushSpec.h>
 @interface InstantpayCodePush : RCTEventEmitter <NativeInstantpayCodePushSpec>
+#else
+#import <React/RCTBridgeModule.h>
+@interface InstantpayCodePush : RCTEventEmitter <RCTBridgeModule>
+#endif
 
 /**
  * Returns the currently active bundle URL from the default (static) instance.
