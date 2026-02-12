@@ -126,7 +126,7 @@ class MainApplication : Application(), ReactApplication {
 Open modify your ```AppDelegate.swift:```
 
 ```
-import IpayCodePush //👈 import this package
+import InstantpayCodePush //👈 import this package
 
 @main
 class AppDelegate: RCTAppDelegate {
@@ -137,7 +137,7 @@ class AppDelegate: RCTAppDelegate {
             RCTBundleURLProvider.sharedSettings().jsBundleURL(forBundleRoot: "index")
         #else
             Bundle.main.url(forResource: "main", withExtension: "jsbundle") //❌ remove this
-            IpayCodePush.bundleURL()  //👈 add this
+            InstantpayCodePush.bundleURL()  //👈 add this
         #endif
     }
 

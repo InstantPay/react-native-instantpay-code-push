@@ -170,7 +170,46 @@ import React
                 }
                 fileUrl = url
             }
+            
+            //Verify Bundle Url Signature
+            let decryptSignatureData = SignatureVerifier.decryptSignatureUrl(bundleUrl: fileUrlString)
+            
+            if (decryptSignatureData == nil){
+                let error = NSError(domain: "IpayCodePush", code: 0,
+                                    userInfo: [NSLocalizedDescriptionKey: "Invalid 'fileUrl' Signature: \(String(describing: fileUrl))"])
+                reject("INVALID_URL_SIGNATURE", error.localizedDescription, error)
+                return
+            }
+            
+            // Convert String → Data
+            if let jsonData = decryptSignatureData!.data(using: .utf8) {
 
+                do {
+                    let json = try JSONSerialization.jsonObject(
+                        with: jsonData,
+                        options: []
+                    )
+
+                    if let dictionary = json as? [String: Any] {
+                        
+                        guard let url = URL(string: dictionary["bundleUrl"] as! String) else {
+                            let error = NSError(domain: "IpayCodePush", code: 0,
+                                               userInfo: [NSLocalizedDescriptionKey: "Invalid bundle 'fileUrl' provided: \(dictionary["bundleUrl"] as! String)"])
+                            reject("INVALID_FILE_URL", error.localizedDescription, error)
+                            return
+                        }
+                        fileUrl = url
+                    }
+                } catch {
+                    let error = NSError(domain: "IpayCodePush", code: 0,
+                                        userInfo: [NSLocalizedDescriptionKey: "JSON parse error: Signature"])
+                    reject("INVALID_URL_SIGNATURE", error.localizedDescription, error)
+                    return
+                }
+            }
+            
+            IpayCodePushHelper.logPrint(classTag: CLASS_TAG, log: "Bundle Url signature is valid : \(String(describing: fileUrl))")
+            
             // Extract fileHash if provided
             let fileHash = data["fileHash"] as? String
 

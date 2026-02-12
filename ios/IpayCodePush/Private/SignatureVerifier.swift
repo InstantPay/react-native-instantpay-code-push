@@ -7,6 +7,8 @@
 
 import Foundation
 import Security
+import CommonCrypto
+import LocalAuthentication
 
 /// Prefix for signed file hash format.
 private let SIGNED_HASH_PREFIX = "sig:"
@@ -451,7 +453,127 @@ public class SignatureVerifier {
             return nil
         }
 
-        return data.base64EncodedString()
+        //return data.base64EncodedString()
+        
+        // 🔥 Wrap PKCS1 key into SPKI format
+        let spkiHeader: [UInt8] = [
+            0x30, 0x82, 0x01, 0x22,
+            0x30, 0x0D,
+            0x06, 0x09,
+            0x2A, 0x86, 0x48, 0x86,
+            0xF7, 0x0D, 0x01, 0x01,
+            0x01, 0x05, 0x00,
+            0x03, 0x82, 0x01, 0x0F,
+            0x00
+        ]
+
+        var spkiData = Data(spkiHeader)
+        spkiData.append(data)
+
+        return spkiData.base64EncodedString()
+    }
+    
+    // MARK: - Hybrid Decrypt (RSA + AES)
+    
+    /**
+     * Decrypt signature from bundle Url.
+     * @param bundleUrl The signed url
+     * @return plan Url to downlaod Bundle
+     */
+    public static func decryptSignatureUrl(bundleUrl: String) -> String? {
+        
+        IpayCodePushHelper.logPrint(classTag: CLASS_TAG, log: "Signed Bundle URL: \(bundleUrl)")
+        
+        var queryParameters: [String: String] = [:]
+
+        // 1. Create a URL object from the string.
+        if let url = URL(string: bundleUrl),
+           // 2. Create a URLComponents object from the URL.
+           let urlComponents = URLComponents(url: url, resolvingAgainstBaseURL: false),
+           // 3. Access the array of URLQueryItem objects.
+           let queryItems = urlComponents.queryItems {
+            
+            // 4. Iterate through the query items and populate the dictionary.
+            for item in queryItems {
+                queryParameters[item.name] = item.value
+            }
+        }
+        
+        IpayCodePushHelper.logPrint(classTag: CLASS_TAG, log: "Parsed URL: \(queryParameters)")
+        
+        if(queryParameters.isEmpty){
+            return nil
+        }
+        
+        let signatureData = queryParameters["signatureData"]!
+        
+        let encryptedKey = queryParameters["itemData"]!
+        
+        let rawIv = queryParameters["raw"]!
+        
+        guard let privateKey = getPrivateKey() else {
+            IpayCodePushHelper.logPrint(classTag: CLASS_TAG, log: "Private key not found to decrypt")
+            return nil
+        }
+        
+        //Decode Base64
+        guard let encryptedKeyData = Data(base64Encoded: encryptedKey),
+              let ivData = Data(base64Encoded: rawIv),
+              let encryptedData = Data(base64Encoded: signatureData)
+        else {
+            IpayCodePushHelper.logPrint(classTag: CLASS_TAG, log: "Base64 decode failed in decryptSignatureUrl")
+            return nil
+        }
+        
+        //RSA Decrypt AES Key (PKCS1)
+        var error: Unmanaged<CFError>?
+        guard let aesKeyData = SecKeyCreateDecryptedData(
+            privateKey,
+            .rsaEncryptionPKCS1,
+            encryptedKeyData as CFData,
+            &error
+        ) as Data? else {
+            IpayCodePushHelper.logPrint(classTag: CLASS_TAG, log: "RSA decrypt failed: \(error?.takeRetainedValue() as Any)")
+            return nil
+        }
+        
+        //AES-256-CBC Decrypt
+        guard aesKeyData.count == 32 else {
+            IpayCodePushHelper.logPrint(classTag: CLASS_TAG, log: "AES key must be 32 bytes (256-bit)")
+            return nil
+        }
+        
+        var outLength = Int(0)
+        let outputData = NSMutableData(length: encryptedData.count + kCCBlockSizeAES128)!
+
+        let status = encryptedData.withUnsafeBytes { encryptedBytes in
+            aesKeyData.withUnsafeBytes { keyBytes in
+                ivData.withUnsafeBytes { ivBytes in
+
+                    CCCrypt(
+                        CCOperation(kCCDecrypt),
+                        CCAlgorithm(kCCAlgorithmAES),
+                        CCOptions(kCCOptionPKCS7Padding),
+                        keyBytes.baseAddress,
+                        aesKeyData.count,
+                        ivBytes.baseAddress,
+                        encryptedBytes.baseAddress,
+                        encryptedData.count,
+                        outputData.mutableBytes,
+                        outputData.length,
+                        &outLength
+                    )
+                }
+            }
+        }
+
+        if status == kCCSuccess {
+            outputData.length = outLength
+            return String(data: outputData as Data, encoding: .utf8)
+        } else {
+            IpayCodePushHelper.logPrint(classTag: CLASS_TAG, log: "AES decrypt failed: \(status)")
+            return nil
+        }
     }
     
 }
